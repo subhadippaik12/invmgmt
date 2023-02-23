@@ -82,3 +82,50 @@ if (shmseg == (void*)-1) {
 
 memset(shmseg, 0, sizeof(SMT)); 
 return shmseg; 
+}
+
+
+
+int producer_main(int i, int NJ) {
+    srand(time(NULL) ^ (getpid()<<16)); 
+    int shm_id;
+    SMT *shmseg = create_SHM(&shm_id);
+    int semid = create_semaphore_set();
+
+    while(true) {
+        
+        JOB job = produce_job(i);
+        
+        
+        int sleep_time = rand() % 4;
+        sleep(sleep_time);
+        
+        semop(semid, &downEmpty, 1);
+        semop(semid, &downMutex, 1);
+        
+        /
+        if(shmseg->job_created < NJ) {
+            if(insert_job(job, shmseg) == -1) { 
+                semop(semid, &upMutex, 1);
+                semop(semid, &upEmpty, 1);
+                continue;
+            }
+            shmseg->job_created++;
+            cout<<"-------------------------\n";
+            cout<<"Job Created : "; 
+            cout<<shmseg->job_created);
+            cout<<"-------------------------\n";
+            
+        }
+        
+        semop(semid, &upMutex, 1);
+        semop(semid, &upFull, 1);
+        
+        
+    }
+    exit(0);
+}
+
+
+
+
