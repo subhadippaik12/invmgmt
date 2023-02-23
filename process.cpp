@@ -86,7 +86,7 @@ return shmseg;
 
 
 
-int producer_main(int i, int NJ) {
+int producer(int i, int NJ) {
     srand(time(NULL) ^ (getpid()<<16)); 
     int shm_id;
     SMT *shmseg = create_SHM(&shm_id);
